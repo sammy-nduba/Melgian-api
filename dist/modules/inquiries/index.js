@@ -1,0 +1,2 @@
+export {};
+// Inquiries module placeholder

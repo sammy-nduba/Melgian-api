@@ -1,0 +1,230 @@
+// Prisma schema placeholder
+// Add your datasource, generator, and models here
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum TourAvailability {
+  AVAILABLE
+  LIMITED
+  SOLD_OUT
+}
+
+enum TourDifficulty {
+  EASY
+  MODERATE
+  ADVENTUROUS
+}
+
+enum TourPackageClass {
+  ADVENTURE_TRAILS
+  EXPLORER_SAFARIS
+  SIGNATURE_ELITE_SAFARIS
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+enum InquiryStatus {
+  NEW
+  CONTACTED
+  CLOSED
+}
+
+model Tour {
+  id              String           @id @default(cuid())
+  slug            String           @unique
+  title           String
+  subtitle        String?
+  description     String
+  destinationName String
+  durationDays    Int
+  priceFrom       Decimal          @db.Decimal(10, 2)
+  currency        String           @default("USD")
+  coverImage      String
+  gallery         String[]
+  rating          Decimal          @default(0) @db.Decimal(2, 1)
+  reviewCount     Int              @default(0)
+  minGroupSize    Int              @default(1)
+  maxGroupSize    Int              @default(12)
+  difficulty      TourDifficulty   @default(EASY)
+  packageClass    TourPackageClass @default(EXPLORER_SAFARIS)
+  availability    TourAvailability @default(AVAILABLE)
+  highlights      String[]
+  included        String[]
+  excluded        String[]
+  isFeatured      Boolean          @default(false)
+  isActive        Boolean          @default(true)
+
+  itinerary       ItineraryDay[]
+  bookings        Booking[]
+
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([slug])
+  @@index([destinationName])
+  @@index([isFeatured])
+  @@index([isActive])
+}
+
+model ItineraryDay {
+  id          String   @id @default(cuid())
+  tourId      String
+  day         Int
+  title       String
+  description String
+
+  tour        Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+
+  @@unique([tourId, day])
+  @@index([tourId])
+}
+
+model Destination {
+  id              String   @id @default(cuid())
+  slug            String   @unique
+  name            String
+  country         String
+  description     String
+  longDescription String?
+  coverImage      String
+  gallery         String[]
+  bestSeason      String
+  climate         String?
+  highlights      String[]
+  isPopular       Boolean  @default(false)
+  isActive        Boolean  @default(true)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([slug])
+  @@index([country])
+  @@index([isPopular])
+  @@index([isActive])
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  tourId          String?
+  fullName        String
+  email           String
+  phone           String
+  travelDate      DateTime
+  adults          Int
+  children        Int           @default(0)
+  message         String?
+  status          BookingStatus @default(PENDING)
+  estimatedAmount Decimal?      @db.Decimal(10, 2)
+  currency        String        @default("USD")
+
+  tour            Tour?         @relation(fields: [tourId], references: [id], onDelete: SetNull)
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([email])
+  @@index([status])
+  @@index([travelDate])
+  @@index([tourId])
+}
+
+model Inquiry {
+  id        String        @id @default(cuid())
+  fullName  String
+  email     String
+  phone     String?
+  subject   String
+  message   String
+  status    InquiryStatus @default(NEW)
+
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+model NewsletterSubscriber {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  source       String?
+  subscribedAt DateTime @default(now())
+  isActive     Boolean  @default(true)
+}
+
+model BlogPost {
+  id                 String   @id @default(cuid())
+  slug               String   @unique
+  title              String
+  excerpt            String
+  content            String
+  coverImage         String
+  category           String
+  author             String
+  publishedAt        DateTime
+  readingTimeMinutes Int
+  seoTitle           String?
+  seoDescription     String?
+  isPublished        Boolean  @default(false)
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([slug])
+  @@index([category])
+  @@index([publishedAt])
+  @@index([isPublished])
+}
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  fullName  String
+  location  String?
+  message   String
+  rating    Int      @default(5)
+  image     String?
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+
+  @@index([isActive])
+}
+
+model FAQ {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String?
+  order     Int      @default(0)
+  isActive  Boolean  @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // Securely hashed password
+  fullName  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}

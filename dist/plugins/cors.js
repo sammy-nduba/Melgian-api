@@ -1,0 +1,2 @@
+export {};
+// CORS plugin placeholder

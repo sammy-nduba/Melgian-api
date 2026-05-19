@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: safari_luxe_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: safari_user
+      POSTGRES_PASSWORD: safari_password
+      POSTGRES_DB: safari_luxe
+    ports:
+      - "5432:5432"
+    volumes:
+      - safari_luxe_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  safari_luxe_postgres_data:

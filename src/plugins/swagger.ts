@@ -1,0 +1,1 @@
+// Swagger plugin placeholder
