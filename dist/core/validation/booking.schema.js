@@ -1,4 +1,3 @@
-// Booking validation schema placeholder
 import { z } from "zod";
 export const createBookingSchema = z.object({
     tourSlug: z.string().optional(),
@@ -9,4 +8,12 @@ export const createBookingSchema = z.object({
     adults: z.number().int().min(1),
     children: z.number().int().min(0).default(0),
     message: z.string().max(2000).optional(),
+});
+export const updateBookingStatusSchema = z.object({
+    status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]),
+});
+export const bookingListQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(50).default(20),
+    status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]).optional(),
 });

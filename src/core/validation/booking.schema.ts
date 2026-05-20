@@ -12,9 +12,7 @@ export const createBookingSchema = z.object({
 });
 
 export const updateBookingStatusSchema = z.object({
-    status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"], {
-        errorMap: () => ({ message: "Invalid booking status value." }),
-    }),
+    status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]),
 });
 
 export const bookingListQuerySchema = z.object({

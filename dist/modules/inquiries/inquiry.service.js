@@ -1,4 +1,4 @@
-import { InquiryRepository } from "@/data/repositories/inquiry.repository.js";
+import { InquiryRepository } from "../../data/repositories/inquiry.repository.js";
 export class InquiryService {
     inquiryRepository;
     constructor(inquiryRepository = new InquiryRepository()) {

@@ -1,18 +1,17 @@
-import { TourRepository } from "@/data/repositories/tour.repository.js";
-import { sendError, sendSuccess } from "@/core/utils/apiResponse.js";
-const tourRepository = new TourRepository();
+import { TourService } from "./tour.service.js";
+import { sendError, sendSuccess } from "../../core/utils/apiResponse.js";
+const tourService = new TourService();
+/**
+ * Handles fetching all active tours, with optional query filters (featured, text search).
+ */
 export async function getToursController(request, reply) {
     try {
-        const { featured, q } = request.query;
-        if (featured === "true") {
-            const tours = await tourRepository.findFeatured();
-            return sendSuccess(reply, tours);
-        }
-        if (q) {
-            const tours = await tourRepository.search(q);
-            return sendSuccess(reply, tours);
-        }
-        const tours = await tourRepository.findAll();
+        const { featured, q, region } = request.query;
+        const tours = await tourService.getTours({
+            featured: featured === "true",
+            q,
+            region,
+        });
         return sendSuccess(reply, tours);
     }
     catch (error) {
@@ -20,9 +19,12 @@ export async function getToursController(request, reply) {
         return sendError(reply, "Unable to fetch tours.", 500);
     }
 }
+/**
+ * Handles fetching a single tour by its unique URL-friendly slug.
+ */
 export async function getTourBySlugController(request, reply) {
     try {
-        const tour = await tourRepository.findBySlug(request.params.slug);
+        const tour = await tourService.getTourBySlug(request.params.slug);
         if (!tour) {
             return sendError(reply, "Tour not found.", 404);
         }

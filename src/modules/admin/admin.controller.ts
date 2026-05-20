@@ -221,11 +221,11 @@ export async function getAdminBookingsController(
  * Accessible by authenticated admins only.
  */
 export async function updateBookingStatusController(
-  request: FastifyRequest<{ Params: { id: string } }>,
+  request: FastifyRequest,
   reply: FastifyReply
 ) {
   try {
-    const { id } = request.params;
+    const { id } = request.params as { id: string };
 
     const parsed = updateBookingStatusSchema.safeParse(request.body);
     if (!parsed.success) {
@@ -270,7 +270,7 @@ export async function createDestinationController(
 }
 
 export async function updateDestinationController(
-  request: FastifyRequest<{ Params: { slug: string } }>,
+  request: FastifyRequest,
   reply: FastifyReply
 ) {
   try {
@@ -279,7 +279,8 @@ export async function updateDestinationController(
       return sendError(reply, "Invalid update input.", 400, parsed.error.flatten());
     }
 
-    const updated = await destinationService.updateDestination(request.params.slug, parsed.data);
+    const { slug } = request.params as { slug: string };
+    const updated = await destinationService.updateDestination(slug, parsed.data);
     return sendSuccess(reply, updated);
   } catch (error) {
     request.log.error(error);
@@ -332,7 +333,7 @@ export async function adminCreateBlogPostController(
 }
 
 export async function adminUpdateBlogPostController(
-  request: FastifyRequest<{ Params: { slug: string } }>,
+  request: FastifyRequest,
   reply: FastifyReply
 ) {
   try {
@@ -340,7 +341,8 @@ export async function adminUpdateBlogPostController(
     if (!parsed.success) {
       return sendError(reply, "Invalid update input.", 400, parsed.error.flatten());
     }
-    const updated = await blogService.updatePost(request.params.slug, parsed.data);
+    const { slug } = request.params as { slug: string };
+    const updated = await blogService.updatePost(slug, parsed.data);
     return sendSuccess(reply, updated);
   } catch (error) {
     request.log.error(error);
@@ -353,11 +355,12 @@ export async function adminUpdateBlogPostController(
 }
 
 export async function adminDeleteBlogPostController(
-  request: FastifyRequest<{ Params: { slug: string } }>,
+  request: FastifyRequest,
   reply: FastifyReply
 ) {
   try {
-    await blogService.deletePost(request.params.slug);
+    const { slug } = request.params as { slug: string };
+    await blogService.deletePost(slug);
     return sendSuccess(reply, { message: "Blog post deleted." });
   } catch (error) {
     request.log.error(error);

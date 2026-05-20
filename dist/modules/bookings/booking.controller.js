@@ -1,6 +1,6 @@
-import { createBookingSchema } from "@/core/validation/booking.schema";
-import { sendError, sendSuccess } from "@/core/utils/apiResponse";
-import { BookingService } from "./booking.service";
+import { createBookingSchema } from "../../core/validation/booking.schema.js";
+import { sendError, sendSuccess } from "../../core/utils/apiResponse.js";
+import { BookingService } from "./booking.service.js";
 export async function createBookingController(request, reply) {
     try {
         const parsed = createBookingSchema.safeParse(request.body);

@@ -31,8 +31,9 @@ export class BookingService {
                         select: { title: true, priceFrom: true, currency: true }
                     })
                     : null;
+                const tourData = tour ? { ...tour, priceFrom: Number(tour.priceFrom) } : null;
 
-                await sendBookingEmails(booking as any, tour);
+                await sendBookingEmails(booking as any, tourData);
             } catch (err) {
                 console.error("[BOOKING SERVICE] Asynchronous booking email dispatch failed:", err);
             }
