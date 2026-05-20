@@ -3,6 +3,14 @@ import {
   getAdminStatsController,
   loginAdminController,
   createTourController,
+  getAdminBookingsController,
+  updateBookingStatusController,
+  createDestinationController,
+  updateDestinationController,
+  adminCreateBlogPostController,
+  adminUpdateBlogPostController,
+  adminDeleteBlogPostController,
+  adminListBlogPostsController,
 } from "./admin.controller.js";
 import { authenticateAdmin } from "./admin.middleware.js";
 
@@ -19,6 +27,8 @@ export async function adminRoutes(app: FastifyInstance) {
         login: "/api/admin/auth/login",
         stats: "/api/admin/stats",
         uploadTour: "/api/admin/tours",
+        bookings: "/api/admin/bookings",
+        destinations: "/api/admin/destinations",
       },
     };
   });
@@ -36,4 +46,61 @@ export async function adminRoutes(app: FastifyInstance) {
     { preHandler: [authenticateAdmin] },
     createTourController
   );
+
+  // Protected Bookings list route (paginated, filterable by status)
+  app.get(
+    "/bookings",
+    { preHandler: [authenticateAdmin] },
+    getAdminBookingsController
+  );
+
+  // Protected Booking status update route
+  app.patch(
+    "/bookings/:id/status",
+    { preHandler: [authenticateAdmin] },
+    updateBookingStatusController
+  );
+
+  // Protected Destination creation route
+  app.post(
+    "/destinations",
+    { preHandler: [authenticateAdmin] },
+    createDestinationController
+  );
+
+  // Protected Destination update route
+  app.patch(
+    "/destinations/:slug",
+    { preHandler: [authenticateAdmin] },
+    updateDestinationController
+  );
+
+  // Protected Blog list route
+  app.get(
+    "/blog",
+    { preHandler: [authenticateAdmin] },
+    adminListBlogPostsController
+  );
+
+  // Protected Blog creation route
+  app.post(
+    "/blog",
+    { preHandler: [authenticateAdmin] },
+    adminCreateBlogPostController
+  );
+
+  // Protected Blog update route
+  app.patch(
+    "/blog/:slug",
+    { preHandler: [authenticateAdmin] },
+    adminUpdateBlogPostController
+  );
+
+  // Protected Blog deletion route
+  app.delete(
+    "/blog/:slug",
+    { preHandler: [authenticateAdmin] },
+    adminDeleteBlogPostController
+  );
 }
+

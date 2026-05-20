@@ -1,7 +1,16 @@
 import { prisma } from "@/core/db/prisma.js";
 import { CreateTourInput } from "@/core/validation/tour.schema.js";
+import { TargetAudience } from "@prisma/client";
 
 export class TourRepository {
+    private getAudienceFilter(region?: string) {
+        if (!region) return undefined;
+        return {
+            in: region === "LOCAL" 
+                ? [TargetAudience.LOCAL, TargetAudience.ALL] 
+                : [TargetAudience.INTERNATIONAL, TargetAudience.ALL],
+        };
+    }
     async create(data: CreateTourInput, slug: string) {
         const { itinerary, ...tourData } = data;
 
@@ -23,10 +32,11 @@ export class TourRepository {
         });
     }
 
-    async findAll() {
+    async findAll(region?: string) {
         return prisma.tour.findMany({
             where: {
                 isActive: true,
+                targetAudience: this.getAudienceFilter(region),
             },
             include: {
                 itinerary: {
@@ -41,11 +51,12 @@ export class TourRepository {
         });
     }
 
-    async findFeatured() {
+    async findFeatured(region?: string) {
         return prisma.tour.findMany({
             where: {
                 isActive: true,
                 isFeatured: true,
+                targetAudience: this.getAudienceFilter(region),
             },
             include: {
                 itinerary: {
@@ -76,10 +87,11 @@ export class TourRepository {
         });
     }
 
-    async search(query: string) {
+    async search(query: string, region?: string) {
         return prisma.tour.findMany({
             where: {
                 isActive: true,
+                targetAudience: this.getAudienceFilter(region),
                 OR: [
                     {
                         title: {

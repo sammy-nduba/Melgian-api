@@ -12,16 +12,18 @@ export async function getToursController(
         Querystring: {
             featured?: string;
             q?: string;
+            region?: string;
         };
     }>,
     reply: FastifyReply
 ) {
     try {
-        const { featured, q } = request.query;
+        const { featured, q, region } = request.query;
 
         const tours = await tourService.getTours({
             featured: featured === "true",
             q,
+            region,
         });
 
         return sendSuccess(reply, tours);

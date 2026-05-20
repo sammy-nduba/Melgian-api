@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { TourAvailability, TourDifficulty, TourPackageClass } from "@prisma/client";
+import { TourAvailability, TourDifficulty, TourPackageClass, TargetAudience } from "@prisma/client";
 
 export const createTourSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
@@ -14,6 +14,7 @@ export const createTourSchema = z.object({
   difficulty: z.nativeEnum(TourDifficulty).default(TourDifficulty.EASY),
   packageClass: z.nativeEnum(TourPackageClass).default(TourPackageClass.EXPLORER_SAFARIS),
   availability: z.nativeEnum(TourAvailability).default(TourAvailability.AVAILABLE),
+  targetAudience: z.nativeEnum(TargetAudience).default(TargetAudience.ALL),
   highlights: z.array(z.string()).default([]),
   included: z.array(z.string()).default([]),
   excluded: z.array(z.string()).default([]),

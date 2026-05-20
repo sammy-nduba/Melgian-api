@@ -62,4 +62,21 @@ export class DestinationRepository {
       },
     });
   }
+
+  async create(data: any, slug: string) {
+    return prisma.destination.create({
+      data: {
+        ...data,
+        slug,
+      },
+    });
+  }
+
+  async update(slug: string, data: any) {
+    return prisma.destination.update({
+      where: { slug },
+      data,
+    });
+  }
 }
+

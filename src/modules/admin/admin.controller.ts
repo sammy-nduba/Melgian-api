@@ -1,8 +1,24 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { adminLoginSchema } from "@/core/validation/admin.schema.js";
 import { createTourSchema } from "@/core/validation/tour.schema.js";
+import {
+  bookingListQuerySchema,
+  updateBookingStatusSchema,
+} from "@/core/validation/booking.schema.js";
+import {
+  createDestinationSchema,
+  updateDestinationSchema,
+} from "@/core/validation/destination.schema.js";
+import {
+  createBlogPostSchema,
+  updateBlogPostSchema,
+  blogListQuerySchema,
+} from "@/core/validation/blog.schema.js";
 import { slugify } from "@/core/utils/slug.js";
 import { TourRepository } from "@/data/repositories/tour.repository.js";
+import { BookingService } from "@/modules/bookings/booking.service.js";
+import { DestinationService } from "@/modules/destinations/destination.service.js";
+import { BlogService } from "@/modules/blog/blog.service.js";
 import { prisma } from "@/core/db/prisma.js";
 import { verifyPassword } from "@/core/utils/crypto.js";
 import { sendError, sendSuccess } from "@/core/utils/apiResponse.js";
@@ -173,5 +189,182 @@ export async function createTourController(
   } catch (error) {
     request.log.error(error);
     return sendError(reply, "Failed to upload tour package.", 500);
+  }
+}
+
+const bookingService = new BookingService();
+
+/**
+ * Returns a paginated, optionally filtered list of all booking inquiries.
+ * Accessible by authenticated admins only.
+ */
+export async function getAdminBookingsController(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const parsed = bookingListQuerySchema.safeParse(request.query);
+    if (!parsed.success) {
+      return sendError(reply, "Invalid query parameters.", 400, parsed.error.flatten());
+    }
+
+    const result = await bookingService.getBookings(parsed.data);
+    return sendSuccess(reply, result);
+  } catch (error) {
+    request.log.error(error);
+    return sendError(reply, "Unable to retrieve bookings.", 500);
+  }
+}
+
+/**
+ * Updates the status of a specific booking (PENDING → CONFIRMED / CANCELLED / COMPLETED).
+ * Accessible by authenticated admins only.
+ */
+export async function updateBookingStatusController(
+  request: FastifyRequest<{ Params: { id: string } }>,
+  reply: FastifyReply
+) {
+  try {
+    const { id } = request.params;
+
+    const parsed = updateBookingStatusSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return sendError(reply, "Invalid status value.", 422, parsed.error.flatten());
+    }
+
+    const updated = await bookingService.updateStatus(id, parsed.data);
+    return sendSuccess(reply, { message: "Booking status updated.", booking: updated });
+  } catch (error) {
+    request.log.error(error);
+    return sendError(
+      reply,
+      error instanceof Error ? error.message : "Unable to update booking status.",
+      error instanceof Error && error.message === "Booking not found." ? 404 : 500
+    );
+  }
+}
+
+const destinationService = new DestinationService();
+
+export async function createDestinationController(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const parsed = createDestinationSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return sendError(reply, "Invalid destination input.", 400, parsed.error.flatten());
+    }
+
+    const slug = slugify(parsed.data.name);
+    const newDestination = await destinationService.createDestination(parsed.data, slug);
+    return sendSuccess(reply, newDestination, 201);
+  } catch (error) {
+    request.log.error(error);
+    return sendError(
+      reply,
+      error instanceof Error ? error.message : "Failed to create destination.",
+      error instanceof Error && error.message.includes("already exists") ? 400 : 500
+    );
+  }
+}
+
+export async function updateDestinationController(
+  request: FastifyRequest<{ Params: { slug: string } }>,
+  reply: FastifyReply
+) {
+  try {
+    const parsed = updateDestinationSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return sendError(reply, "Invalid update input.", 400, parsed.error.flatten());
+    }
+
+    const updated = await destinationService.updateDestination(request.params.slug, parsed.data);
+    return sendSuccess(reply, updated);
+  } catch (error) {
+    request.log.error(error);
+    return sendError(
+      reply,
+      error instanceof Error ? error.message : "Failed to update destination.",
+      error instanceof Error && error.message === "Destination not found." ? 404 : 500
+    );
+  }
+}
+
+const blogService = new BlogService();
+
+export async function adminListBlogPostsController(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const parsed = blogListQuerySchema.safeParse(request.query);
+    if (!parsed.success) {
+      return sendError(reply, "Invalid query parameters.", 400, parsed.error.flatten());
+    }
+    const result = await blogService.listAll(parsed.data);
+    return sendSuccess(reply, result);
+  } catch (error) {
+    request.log.error(error);
+    return sendError(reply, "Unable to retrieve blog posts.", 500);
+  }
+}
+
+export async function adminCreateBlogPostController(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  try {
+    const parsed = createBlogPostSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return sendError(reply, "Invalid blog post input.", 400, parsed.error.flatten());
+    }
+    const post = await blogService.createPost(parsed.data);
+    return sendSuccess(reply, post, 201);
+  } catch (error) {
+    request.log.error(error);
+    return sendError(
+      reply,
+      error instanceof Error ? error.message : "Failed to create blog post.",
+      error instanceof Error && error.message.includes("already exists") ? 400 : 500
+    );
+  }
+}
+
+export async function adminUpdateBlogPostController(
+  request: FastifyRequest<{ Params: { slug: string } }>,
+  reply: FastifyReply
+) {
+  try {
+    const parsed = updateBlogPostSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return sendError(reply, "Invalid update input.", 400, parsed.error.flatten());
+    }
+    const updated = await blogService.updatePost(request.params.slug, parsed.data);
+    return sendSuccess(reply, updated);
+  } catch (error) {
+    request.log.error(error);
+    return sendError(
+      reply,
+      error instanceof Error ? error.message : "Failed to update blog post.",
+      error instanceof Error && error.message === "Blog post not found." ? 404 : 500
+    );
+  }
+}
+
+export async function adminDeleteBlogPostController(
+  request: FastifyRequest<{ Params: { slug: string } }>,
+  reply: FastifyReply
+) {
+  try {
+    await blogService.deletePost(request.params.slug);
+    return sendSuccess(reply, { message: "Blog post deleted." });
+  } catch (error) {
+    request.log.error(error);
+    return sendError(
+      reply,
+      error instanceof Error ? error.message : "Failed to delete blog post.",
+      error instanceof Error && error.message === "Blog post not found." ? 404 : 500
+    );
   }
 }

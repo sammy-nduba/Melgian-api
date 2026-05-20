@@ -14,6 +14,7 @@ import { inquiryRoutes } from "./modules/inquiries/inquiry.routes.js";
 import { newsletterRoutes } from "./modules/newsletter/newsletter.routes.js";
 import { destinationRoutes } from "./modules/destinations/destination.routes.js";
 import { adminRoutes } from "./modules/admin/admin.routes.js";
+import { blogRoutes } from "./modules/blog/blog.routes.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -49,6 +50,7 @@ export async function buildApp() {
   await app.register(inquiryRoutes, { prefix: "/api/inquiries" });
   await app.register(newsletterRoutes, { prefix: "/api/newsletter" });
   await app.register(destinationRoutes, { prefix: "/api/destinations" });
+  await app.register(blogRoutes, { prefix: "/api/blog" });
   await app.register(adminRoutes, { prefix: "/api/admin" });
 
   // Default welcome and API status root route
@@ -61,6 +63,7 @@ export async function buildApp() {
         health: "/api/health",
         tours: "/api/tours",
         destinations: "/api/destinations",
+        blog: "/api/blog",
         bookings: "/api/bookings",
         inquiries: "/api/inquiries",
         newsletter: "/api/newsletter",

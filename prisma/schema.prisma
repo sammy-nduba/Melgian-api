@@ -28,6 +28,12 @@ enum TourPackageClass {
   SIGNATURE_ELITE_SAFARIS
 }
 
+enum TargetAudience {
+  LOCAL
+  INTERNATIONAL
+  ALL
+}
+
 enum BookingStatus {
   PENDING
   CONFIRMED
@@ -41,6 +47,20 @@ enum InquiryStatus {
   CLOSED
 }
 
+enum BlogCategory {
+  SAFARI_PLANNING
+  TRAVEL_TIPS
+  WILDLIFE
+  CONSERVATION
+  DESTINATIONS
+  LUXURY_TRAVEL
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+}
+
 model Tour {
   id              String           @id @default(cuid())
   slug            String           @unique
@@ -51,6 +71,7 @@ model Tour {
   durationDays    Int
   priceFrom       Decimal          @db.Decimal(10, 2)
   currency        String           @default("USD")
+  targetAudience  TargetAudience   @default(ALL)
   coverImage      String
   gallery         String[]
   rating          Decimal          @default(0) @db.Decimal(2, 1)
@@ -165,27 +186,29 @@ model NewsletterSubscriber {
 }
 
 model BlogPost {
-  id                 String   @id @default(cuid())
-  slug               String   @unique
+  id                 String       @id @default(cuid())
+  slug               String       @unique
   title              String
   excerpt            String
   content            String
   coverImage         String
-  category           String
-  author             String
-  publishedAt        DateTime
-  readingTimeMinutes Int
+  category           BlogCategory @default(SAFARI_PLANNING)
+  author             String       @default("Melgian Expeditions Team")
+  status             BlogStatus   @default(DRAFT)
+  readingTimeMinutes Int          @default(5)
   seoTitle           String?
   seoDescription     String?
-  isPublished        Boolean  @default(false)
+  isFeatured         Boolean      @default(false)
+  tags               String[]
 
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  publishedAt        DateTime?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
 
   @@index([slug])
+  @@index([status])
   @@index([category])
-  @@index([publishedAt])
-  @@index([isPublished])
+  @@index([isFeatured])
 }
 
 model Testimonial {

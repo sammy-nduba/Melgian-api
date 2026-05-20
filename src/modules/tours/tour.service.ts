@@ -9,14 +9,14 @@ export class TourService {
   /**
    * Retrieves tours based on query criteria (featured packages or search queries).
    */
-  async getTours(options: { featured?: boolean; q?: string }) {
+  async getTours(options: { featured?: boolean; q?: string; region?: string }) {
     if (options.featured) {
-      return this.tourRepository.findFeatured();
+      return this.tourRepository.findFeatured(options.region);
     }
     if (options.q) {
-      return this.tourRepository.search(options.q);
+      return this.tourRepository.search(options.q, options.region);
     }
-    return this.tourRepository.findAll();
+    return this.tourRepository.findAll(options.region);
   }
 
   /**

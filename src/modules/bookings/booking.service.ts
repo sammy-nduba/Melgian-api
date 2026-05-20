@@ -1,4 +1,4 @@
-import { CreateBookingInput } from "@/core/validation/booking.schema.js";
+import { BookingListQuery, CreateBookingInput, UpdateBookingStatusInput } from "@/core/validation/booking.schema.js";
 import { BookingRepository } from "@/data/repositories/booking.repository.js";
 import { sendBookingEmails } from "@/core/utils/mailer.js";
 import { prisma } from "@/core/db/prisma.js";
@@ -25,13 +25,13 @@ export class BookingService {
         // Fetch tour details and dispatch emails asynchronously in the background
         (async () => {
             try {
-                const tour = booking.tourId 
+                const tour = booking.tourId
                     ? await prisma.tour.findUnique({
                         where: { id: booking.tourId },
                         select: { title: true, priceFrom: true, currency: true }
                     })
                     : null;
-                
+
                 await sendBookingEmails(booking as any, tour);
             } catch (err) {
                 console.error("[BOOKING SERVICE] Asynchronous booking email dispatch failed:", err);
@@ -39,5 +39,13 @@ export class BookingService {
         })();
 
         return booking;
+    }
+
+    async getBookings(query: BookingListQuery) {
+        return this.bookingRepository.getBookings(query);
+    }
+
+    async updateStatus(id: string, data: UpdateBookingStatusInput) {
+        return this.bookingRepository.updateStatus(id, data);
     }
 }
