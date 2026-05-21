@@ -1,2 +1,0 @@
-export {};
-// Destinations module placeholder
