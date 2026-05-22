@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
+    "types": ["node"],
     "baseUrl": "./src",
     "ignoreDeprecations": "6.0",
     "paths": {
