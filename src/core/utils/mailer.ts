@@ -23,8 +23,8 @@ interface TourEmailData {
  */
 function getTravelerHTML(booking: BookingEmailData, tour: TourEmailData | null): string {
   const tourTitle = tour?.title || "Bespoke Custom Journey";
-  const estimatedCost = booking.estimatedAmount 
-    ? `$${Number(booking.estimatedAmount).toLocaleString()}` 
+  const estimatedCost = booking.estimatedAmount
+    ? `$${Number(booking.estimatedAmount).toLocaleString()}`
     : "Bespoke Quote Pending";
 
   return `
@@ -102,8 +102,8 @@ function getTravelerHTML(booking: BookingEmailData, tour: TourEmailData | null):
  */
 function getAdminHTML(booking: BookingEmailData, tour: TourEmailData | null): string {
   const tourTitle = tour?.title || "Bespoke Custom Journey";
-  const estimatedCost = booking.estimatedAmount 
-    ? `$${Number(booking.estimatedAmount).toLocaleString()}` 
+  const estimatedCost = booking.estimatedAmount
+    ? `$${Number(booking.estimatedAmount).toLocaleString()}`
     : "Bespoke Quote Pending";
 
   return `
@@ -189,7 +189,7 @@ export async function sendBookingEmails(
   booking: BookingEmailData,
   tour: TourEmailData | null
 ): Promise<void> {
-  const adminRecipient = env.BOOKING_NOTIFICATION_EMAIL || "bookings@melgianexpeditions.com";
+  const adminRecipient = env.BOOKING_NOTIFICATION_EMAIL;
   const travelerRecipient = booking.email;
   const senderEmail = env.SENDER_EMAIL;
 

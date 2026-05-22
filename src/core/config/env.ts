@@ -12,9 +12,9 @@ const envSchema = z.object({
   FRONTEND_URL: z.string().url(),
   ADMIN_API_SECRET: z.string().min(8),
   JWT_SECRET: z.string().min(16),
-  BOOKING_NOTIFICATION_EMAIL: z.string().email().optional(),
+  BOOKING_NOTIFICATION_EMAIL: z.string().email().default("[EMAIL_ADDRESS]"),
   RESEND_API_KEY: z.string().optional(),
-  SENDER_EMAIL: z.string().email().default("onboarding@resend.dev"),
+  SENDER_EMAIL: z.string().email().default("[EMAIL_ADDRESS]"),
 });
 
 const parsed = envSchema.safeParse(process.env);
