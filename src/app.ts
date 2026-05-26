@@ -28,8 +28,24 @@ export async function buildApp() {
     },
   });
 
+  const allowedOrigins = [
+    env.FRONTEND_URL,
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+  ];
+  try {
+    const frontendUrlObj = new URL(env.FRONTEND_URL);
+    if (!frontendUrlObj.hostname.startsWith('www.')) {
+      allowedOrigins.push(`${frontendUrlObj.protocol}//www.${frontendUrlObj.hostname}`);
+    } else {
+      allowedOrigins.push(`${frontendUrlObj.protocol}//${frontendUrlObj.hostname.substring(4)}`);
+    }
+  } catch (e) {
+    // Ignore invalid URL
+  }
+
   await app.register(cors, {
-    origin: env.FRONTEND_URL,
+    origin: allowedOrigins,
     credentials: true,
   });
 
