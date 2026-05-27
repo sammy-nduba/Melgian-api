@@ -9,7 +9,13 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(5000),
   DATABASE_URL: z.string().min(1),
-  FRONTEND_URL: z.string().url(),
+  FRONTEND_URL: z.preprocess((val) => {
+    if (typeof val !== "string") return val;
+    if (!val.startsWith("http://") && !val.startsWith("https://")) {
+      return `https://${val}`;
+    }
+    return val;
+  }, z.string().url()),
   ADMIN_API_SECRET: z.string().min(8),
   JWT_SECRET: z.string().min(16),
   BOOKING_NOTIFICATION_EMAIL: z.string().email().default("[EMAIL_ADDRESS]"),
