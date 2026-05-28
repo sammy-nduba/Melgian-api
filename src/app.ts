@@ -28,36 +28,54 @@ export async function buildApp() {
     },
   });
 
+  // Always-allowed origins (local dev)
   const allowedOrigins: string[] = [
     "http://localhost:3000",
-    "http://127.0.0.1:3000"
+    "http://127.0.0.1:3000",
+    // Production domain — both http and https, with and without www
+    "http://melgianexpeditions.com",
+    "https://melgianexpeditions.com",
+    "http://www.melgianexpeditions.com",
+    "https://www.melgianexpeditions.com",
   ];
 
+  // Also include whatever FRONTEND_URL env var is set to (handles Render preview URLs, etc.)
   try {
     const parsedUrl = new URL(env.FRONTEND_URL);
     const protocol = parsedUrl.protocol;
     const hostname = parsedUrl.hostname;
     const port = parsedUrl.port ? `:${parsedUrl.port}` : "";
-    
-    const baseOrigin = `${protocol}//${hostname}${port}`;
-    allowedOrigins.push(baseOrigin);
 
-    if (!hostname.startsWith('www.')) {
-      allowedOrigins.push(`${protocol}//www.${hostname}${port}`);
+    const baseOrigin = `${protocol}//${hostname}${port}`;
+    if (!allowedOrigins.includes(baseOrigin)) allowedOrigins.push(baseOrigin);
+
+    if (!hostname.startsWith("www.")) {
+      const wwwVariant = `${protocol}//www.${hostname}${port}`;
+      if (!allowedOrigins.includes(wwwVariant)) allowedOrigins.push(wwwVariant);
     } else {
-      allowedOrigins.push(`${protocol}//${hostname.substring(4)}${port}`);
+      const noWwwVariant = `${protocol}//${hostname.substring(4)}${port}`;
+      if (!allowedOrigins.includes(noWwwVariant)) allowedOrigins.push(noWwwVariant);
     }
-  } catch (e) {
-    let directOrigin = env.FRONTEND_URL.trim();
-    if (directOrigin.endsWith('/')) {
-      directOrigin = directOrigin.slice(0, -1);
-    }
-    allowedOrigins.push(directOrigin);
+  } catch {
+    let directOrigin = env.FRONTEND_URL.trim().replace(/\/$/, "");
+    if (!allowedOrigins.includes(directOrigin)) allowedOrigins.push(directOrigin);
   }
 
   await app.register(cors, {
-    origin: allowedOrigins,
+    origin: (origin, cb) => {
+      // Allow requests with no origin (server-to-server, curl, Postman)
+      if (!origin || allowedOrigins.includes(origin)) {
+        cb(null, true);
+      } else {
+        cb(new Error(`Origin '${origin}' not allowed by CORS`), false);
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
+    // Automatically handle OPTIONS preflight requests
+    strictPreflight: false,
+    preflight: true,
   });
 
   await app.register(helmet);
