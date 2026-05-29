@@ -5,7 +5,7 @@ import {
     TourAvailability,
     TourDifficulty,
 } from "@prisma/client";
-import { hashPassword } from "../src/core/utils/crypto.js";
+import { hashPassword } from "../src/core/utils/crypto.ts";
 
 const prisma = new PrismaClient();
 
