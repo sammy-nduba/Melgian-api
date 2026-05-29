@@ -16,7 +16,12 @@ async function main() {
         where: {
             email: "admin@melgianexpeditions.com",
         },
-        update: {},
+        // Always refresh credentials so re-running the seed is idempotent
+        update: {
+            email: "admin@melgianexpeditions.com",
+            password: adminPasswordHash,
+            fullName: "Chief Expedition Officer",
+        },
         create: {
             email: "admin@melgianexpeditions.com",
             password: adminPasswordHash,
